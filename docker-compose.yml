@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./ProductBackend/ProductBackend/Dockerfile
+    ports:
+      - "7137:8080"
+    networks:
+      - react-dotnet-network
+    depends_on:
+      - mssql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=ProductDatabase;User Id=sa;Password=YourStrongPassword123;TrustServerCertificate=True;
+
+  frontend:
+    build:
+      context: ./product_management
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    networks:
+      - react-dotnet-network
+    depends_on:
+      - backend
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrongPassword123
+      - MSSQL_DB=ProductDatabase
+    ports:
+      - "1433:1433"
+    networks:
+      - react-dotnet-network
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U sa -P YourStrongPassword123 -Q 'USE ProductDatabase; SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  react-dotnet-network:
+    driver: bridge
+
+volumes:
+  mssql_data:
