@@ -47,7 +47,7 @@ appsettings.json
 appsettings.Development.json
 
 # Entity Framework Migrations
-Migrations/
+# Migrations/
 
 # Rider projects
 .idea/
